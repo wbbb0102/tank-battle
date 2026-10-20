@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#04090c">
+  <meta name="description" content="钢铁前线：一款无需安装、打开即玩的 HTML5 Canvas 坦克大战。守住基地，击退五大战区的装甲部队。">
+  <title>钢铁前线 · STEEL FRONT</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23060f13'/%3E%3Cpath d='M15 19h8v9h18v-9h8v26h-8v-9H23v9h-8z' fill='%235de8d6'/%3E%3Cpath d='M27 10h10v9H27z' fill='%23f7b955'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="page-grid" aria-hidden="true"></div>
+
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 48 48" role="img">
+            <path d="M10 15h7v7h14v-7h7v20h-7v-7H17v7h-7z" fill="currentColor"/>
+            <path d="M20 8h8v7h-8z" fill="currentColor" opacity=".55"/>
+            <path d="M17 20h14v4H17z" fill="#061316"/>
+          </svg>
+        </div>
+        <div class="brand-copy">
+          <p class="overline">ARCADE DEFENSE PROTOCOL · 1985</p>
+          <h1>STEEL FRONT <em>/ 坦克大战</em></h1>
+        </div>
+      </div>
+
+      <div class="top-actions">
+        <button class="ghost-btn" id="soundBtn" type="button" aria-pressed="true" aria-label="关闭声音">
+          <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 8v4h3l4 3V5L6 8H3z" fill="currentColor"/><path d="M13 7c1.2 1.4 1.2 4.6 0 6M15.5 4.7c2.5 2.7 2.5 7.9 0 10.6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          <span id="soundLabel">声音 On</span>
+        </button>
+        <button class="ghost-btn" id="pauseBtn" type="button" disabled>
+          <span class="pause-glyph" aria-hidden="true">Ⅱ</span>
+          <span id="pauseLabel">暂停</span>
+        </button>
+      </div>
+    </header>
+
+    <main class="game-shell">
+      <section class="hud" aria-label="战况信息">
+        <div class="stat score-stat">
+          <span class="stat-label">得分<span class="label-en"> / SCORE</span></span>
+          <strong class="stat-value" id="score">000000</strong>
+        </div>
+        <div class="stat">
+          <span class="stat-label">最高<span class="label-en"> / BEST</span></span>
+          <strong class="stat-value muted-value" id="best">000000</strong>
+        </div>
+        <div class="stat">
+          <span class="stat-label">战区<span class="label-en"> / SECTOR</span></span>
+          <strong class="stat-value" id="level">01<span class="stat-sub">/05</span></strong>
+        </div>
+        <div class="stat enemy-stat">
+          <span class="stat-label">敌军<span class="label-en"> / HOSTILES</span></span>
+          <strong class="stat-value" id="enemies">00</strong>
+        </div>
+        <div class="stat">
+          <span class="stat-label">装甲<span class="label-en"> / ARMOR</span></span>
+          <strong class="stat-value" id="lives">×3</strong>
+        </div>
+      </section>
+
+      <div class="stage-frame">
+        <div class="stage" id="stage">
+          <canvas id="game" width="624" height="624" tabindex="0" aria-label="坦克大战游戏区域。使用方向键或 WASD 移动，空格开火。"></canvas>
+
+          <div class="stage-badges" aria-hidden="true">
+            <span class="buff-badge shield-badge is-hidden" id="shieldBadge">护盾 <b id="shieldTime">0s</b></span>
+            <span class="buff-badge rapid-badge is-hidden" id="rapidBadge">速射 <b id="rapidTime">0s</b></span>
+          </div>
+
+          <div class="scanlines" aria-hidden="true"></div>
+
+          <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+          <div class="overlay is-open" id="overlay" aria-live="polite"></div>
+        </div>
+      </div>
+
+      <div class="meta-bar">
+        <div class="control-hints" aria-label="键盘操作说明">
+          <span><kbd>WASD</kbd><kbd>↑↓←→</kbd> 移动</span>
+          <span><kbd>SPACE</kbd> 开火</span>
+          <span><kbd>P</kbd> 暂停</span>
+          <span><kbd>M</kbd> 静音</span>
+        </div>
+        <p class="sector-label" id="sectorLabel">SECTOR 01 · 灰烬街区</p>
+      </div>
+
+      <div class="mobile-controls" aria-label="触屏操作">
+        <div class="dpad">
+          <button class="pad pad-up" type="button" data-pad="up" aria-label="向上移动">▲</button>
+          <button class="pad pad-left" type="button" data-pad="left" aria-label="向左移动">◀</button>
+          <span class="dpad-core" aria-hidden="true"></span>
+          <button class="pad pad-right" type="button" data-pad="right" aria-label="向右移动">▶</button>
+          <button class="pad pad-down" type="button" data-pad="down" aria-label="向下移动">▼</button>
+        </div>
+        <button class="fire-btn" id="touchFire" type="button" aria-label="按住开火">
+          <span class="fire-ring" aria-hidden="true"></span>
+          <span>开火<small>FIRE</small></span>
+        </button>
+      </div>
+
+      <p class="footnote">HTML5 CANVAS · 最高分自动保存在本地 · 支持键盘与触屏</p>
+    </main>
+  </div>
+
+  <script src="game.js"></script>
+</body>
+</html>
