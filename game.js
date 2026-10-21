@@ -2653,6 +2653,33 @@
     }
   }
 
+  const SHARE_URL = 'https://wbbb0102.github.io/tank-battle/';
+  const SHARE_TITLE = '钢铁前线 · STEEL FRONT';
+  const SHARE_TEXT = '五个战区，一支孤军。守住指挥核心，击退装甲部队——打开浏览器就能开战。';
+
+  async function shareGame() {
+    if (typeof navigator.share === 'function' && navigator.maxTouchPoints > 0) {
+      try {
+        await navigator.share({ title: SHARE_TITLE, text: SHARE_TEXT, url: SHARE_URL });
+        return;
+      } catch (error) {
+        if (error && error.name === 'AbortError') return;
+      }
+    }
+
+    try {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(`${SHARE_TEXT} ${SHARE_URL}`);
+        showToast('分享链接已复制，发给朋友就能开战', 2400);
+        return;
+      }
+    } catch (error) {
+      // fall back to the manual prompt below
+    }
+
+    window.prompt('复制下面的链接分享给朋友：', SHARE_URL);
+  }
+
   function overlayMarkup(kind) {
     const info = LEVELS[level - 1];
     const displayBest = Math.max(best, score);
@@ -2670,6 +2697,7 @@
             <div class="key-cell"><span class="keycap">M</span><small>声音</small></div>
           </div>
           <button class="action" type="button" data-action="start">开始作战<span class="arrow">→</span></button>
+          <button class="text-action overlay-share" type="button" data-action="share">分享给朋友 <span aria-hidden="true">↗</span></button>
           <p class="overlay-foot"><span>最高记录 <strong>${formatScore(best)}</strong></span><span>触屏设备可使用下方控制键</span></p>
         </div>
       `;
@@ -2721,7 +2749,10 @@
             <div class="result-cell"><span>总击毁</span><b>${kills}</b></div>
             <div class="result-cell"><span>保留装甲</span><b class="amber">×${lives}</b></div>
           </div>
-          <button class="action" type="button" data-action="restart">再战一轮<span class="arrow">↻</span></button>
+          <div class="action-row">
+            <button class="action" type="button" data-action="restart">再战一轮<span class="arrow">↻</span></button>
+            <button class="text-action" type="button" data-action="share">分享战绩 <span aria-hidden="true">↗</span></button>
+          </div>
           <p class="overlay-foot"><span>STEEL FRONT // MISSION COMPLETE</span><span>最高分自动保存在本地</span></p>
         </div>
       `;
@@ -2770,6 +2801,7 @@
     if (action === 'start' || action === 'restart') startGame();
     else if (action === 'resume') resumeGame();
     else if (action === 'next') nextLevel();
+    else if (action === 'share') shareGame();
   }
 
   // ---------------------------------------------------------------------------
